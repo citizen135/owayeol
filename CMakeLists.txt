@@ -18,6 +18,7 @@ add_message_files(
   YoloResult.msg
   ChangeRobot.msg
   RobotState.msg
+  Trigger.msg
 )
 
 catkin_python_setup()
