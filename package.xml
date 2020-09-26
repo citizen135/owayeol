@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>owayeol</name>
+  <version>0.0.0</version>
+  <description>The owayeol package</description>
+  <maintainer email="pjh@todo.todo">pjh</maintainer>
+  <license>TODO</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rosbag</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>move_base_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>rqt_gui</build_depend>
+  <build_depend>rqt_gui_py</build_depend>
+  <build_export_depend>rosbag</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>move_base_msgs</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>rqt_gui</build_export_depend>
+  <build_export_depend>rqt_gui_py</build_export_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>rosbag</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>move_base_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>rqt_gui</exec_depend>
+  <exec_depend>rqt_gui_py</exec_depend>
+  <exec_depend>rqt_py_common</exec_depend>
+  <export>
+    <architecture_independent/>
+    <!-- Other tools can request additional information be placed here -->
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>
