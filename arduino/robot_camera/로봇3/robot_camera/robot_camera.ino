@@ -48,7 +48,7 @@ Servo robot_servos[2];
 char servo_pins[2] = {6, 5}; // PWM Pins on Arduino Uno
 int mid_positions[2] = {90, 90};
 int SERVO_CURRENT_POSITIONS[2];
-char frameid[] = "/robot3/link3";
+char frameid[] = "/robot2/link3";
 float TARGET_JOINT_POSITIONS[2] = {0,0};
 
 
@@ -431,8 +431,8 @@ void updateTFPrefix(bool isConnected)
 
       if (!strcmp(get_tf_prefix, ""))
       {
-        sprintf(odom_header_frame_id, "robot3/odom");
-        sprintf(odom_child_frame_id, "robot3/base_footprint");  
+        sprintf(odom_header_frame_id, "robot2/odom");
+        sprintf(odom_child_frame_id, "robot2/base_footprint");  
       }
       else
       {

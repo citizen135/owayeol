@@ -13,27 +13,38 @@ servoy=0
 directio=0
 tok=0
 
+Kp=0.01
+Kd=0.01
+Ki=0.01
+
+start_time = time.time()
+errorx_prev = 0.
+errory_prev = 0.
+time_prev = 0.
+
 def ALERT(data):
     global servox
     global servoy
     global tok
+
+    global time_prev
     
     for st in data.bounding_boxes:           
         print(st.Class)
-        if (st.Class=="person") and (st.probability>0.5):
+        if (st.Class=="person"):
             tok=0
             midx=(st.xmin+st.xmax)/2
-            oh=0#st.xmax-st.xmin
-            if midx<(310-oh):
-                servox=servox+0.02
-            elif midx>(330+oh):
-                servox=servox-0.02
             midy=(st.ymax+st.ymin)/2
-            yeol=0#st.ymax-st.ymin
-            if midy<(230-yeol):
-                servoy=servoy+0.01
-            elif midy>(250+yeol):
-                servoy=servoy-0.01
+            errorx=320-midx
+            errory=240-midy
+            dex = errorx-errorx_prev
+            dey = errory-errory_prev
+            dt = time.time() - time_prev
+            servox = Kp*errorx + Kd*dex/dt + Ki*errorx*dt
+            servoy = Kp*errory + Kd*dey/dt + Ki*errory*dt
+            errorx_prev = errorx
+            errory_prev = errory
+            time_prev = time.time()
     if (servox<-1.5):
         servox=-1.5
     elif (servox>1.5):
@@ -48,13 +59,13 @@ def point(data):
     global servox
     global servoy
 
-    goal_publisher = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=2)
+    goal_publisher = rospy.Publisher('/find', PoseStamped, queue_size=1)
     goal = PoseStamped()
     goal.header.stamp =rospy.Time.now()
     goal.header.frame_id = "base"
 
-    goal.pose.position.x=data.range*math.cos(servox+3.14)*math.sin(servoy)*3.14
-    goal.pose.position.y=data.range*math.sin(servox+3.14)*math.sin(servoy)*3.14
+    goal.pose.position.x=data.range*math.cos(servox)*math.sin(servoy+1.57)
+    goal.pose.position.y=data.range*math.sin(servox)*math.sin(servoy+1.57)
     goal.pose.position.z=0
     goal_publisher.publish(goal)
 

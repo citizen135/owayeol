@@ -155,7 +155,7 @@ char odom_child_frame_id[30];
 // callback function prototype
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 // message
-ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("/robot3/cmd_vel", commandVelocityCallback);
+ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("/robot2/cmd_vel", commandVelocityCallback);
 
 /* Odometry publisher */
 nav_msgs::Odometry odom;
