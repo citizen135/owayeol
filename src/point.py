@@ -13,9 +13,9 @@ servoy=0
 directio=0
 tok=0
 
-Kp=0.01
-Kd=0.01
-Ki=0.01
+Kp=0.0005
+Kd=0.0000001
+Ki=0.0001
 
 start_time = time.time()
 errorx_prev = 0.
