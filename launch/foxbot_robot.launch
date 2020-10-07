@@ -11,6 +11,7 @@
 
     <include file="$(find jetson_camera)/launch/jetson_camera.launch"/>
     <node pkg="odometry_transform_broadcaster" type="broadcast"  name="broadcast" output="screen" />
+    <node pkg="owayeol" type="point.py"  name="cctv" output="screen" />
 
 <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
   <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>

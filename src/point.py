@@ -13,9 +13,10 @@ servoy=0
 directio=0
 tok=0
 
-Kp=0.0005
+Kp=0.0001
 Kd=0.0000001
-Ki=0.0001
+Ki=0.001
+Kpy=0.00001
 
 start_time = time.time()
 errorx_prev = 0.
@@ -28,9 +29,10 @@ def ALERT(data):
     global tok
 
     global time_prev
-    
+    global errorx_prev
+    global errory_prev
+
     for st in data.bounding_boxes:           
-        print(st.Class)
         if (st.Class=="person"):
             tok=0
             midx=(st.xmin+st.xmax)/2
@@ -41,7 +43,17 @@ def ALERT(data):
             dey = errory-errory_prev
             dt = time.time() - time_prev
             servox = Kp*errorx + Kd*dex/dt + Ki*errorx*dt
-            servoy = Kp*errory + Kd*dey/dt + Ki*errory*dt
+            servoy = Kpy*errory + Kd*dey/dt + Ki*errory*dt
+            if controlx>0.3:
+                controlx=0.3
+            elif controlx<-0.3:
+                controlx=-0.3
+            if controly>0.3:
+                controly=0.3
+            elif controly<-0.3:
+                controly=-0.3
+            servox = servox+controlx
+            servoy = servoy+controly
             errorx_prev = errorx
             errory_prev = errory
             time_prev = time.time()
