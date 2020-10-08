@@ -111,12 +111,6 @@ def talker():
 
 def tic(event):
     global tok
-    global directio
-    global servox
-    head=(-1.5,0,1.5)
-    tok=tok+1
-
-global tok
     global servox
     global servoy
     tok=tok+1
