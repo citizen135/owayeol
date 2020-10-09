@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import rospy
-import move_base
 import time
 from std_msgs.msg import String,Int32,Header
 from geometry_msgs.msg import PoseStamped
@@ -118,6 +117,7 @@ def tic(event):
     if tok>=10:
         tok=0
         servox+=0.2
+        servoy=0
         if servox>=1.5:
             servox=-1.5
 
