@@ -10,6 +10,7 @@ import math
 servox=0
 servoy=0
 tok=0
+search=1
 
 Kp=0.0003
 Ki=0.0000000000001
@@ -65,7 +66,7 @@ def ALERT(data):
             errory_prev = errory
             find=1
             print(Kp*errorx)
-	    print(Ki*errorx*dt)
+	        print(Ki*errorx*dt)
             print(Kd*dex/dt)
             print(servox)
     if (servox<-1.5):
@@ -84,10 +85,10 @@ def point(data):
     global goal
 
     goal.header.stamp =rospy.Time.now()
-    goal.header.frame_id = "base"
+    goal.header.frame_id = "base"               #robot1/link1
 
-    goal.pose.position.x=data.range*math.cos(servox)*math.sin(servoy+1.57)
-    goal.pose.position.y=data.range*math.sin(servox)*math.sin(servoy+1.57)
+    goal.pose.position.x=-1*data.range*math.cos(servox)*math.sin(servoy+1.57)
+    goal.pose.position.y=-1*data.range*math.sin(servox)*math.sin(servoy+1.57)
     goal.pose.position.z=0
 
 def talker():
@@ -112,24 +113,33 @@ def tic(event):
     global tok
     global servox
     global servoy
+    global search
     tok=tok+1
 
-    if tok>=10:
+    if (tok>=10)and(search==1):
         tok=0
         servox+=0.2
         servoy=0
         if servox>=1.5:
             servox=-1.5
 
+def who(data):
+    global goal
+    global search
 
+    if data.header.frame_id==goal.header.frame_id:
+        search=0
+    else:
+        search=1
 
 
 
 
 if __name__ == '__main__':
-    rospy.init_node('owayeol_cctv_point')
-    rospy.Subscriber("/darknet_ros/bounding_boxes",BoundingBoxes,ALERT)
-    rospy.Subscriber("/range_data",Range,point)
+    rospy.init_node('owayeol_cctv_point')                                   
+    rospy.Subscriber("/darknet_ros/bounding_boxes",BoundingBoxes,ALERT)     #/robot2/dart~~
+    rospy.Subscriber("/range_data",Range,point)                             #/robot2/range~~
+    rospy.Subscriber("/find",PoseStamped,who)
     #rospy.init_node('joint_state_publisher')
     servox=0
     servoy=0
