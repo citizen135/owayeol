@@ -1,0 +1,158 @@
+<?xml version="1.0" ?>
+<robot name="foxbot">
+  <material name="black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+  <material name="orange">
+    <color rgba="1.0 0.5 0.2 1" />
+  </material>
+  <material name="gray">
+    <color rgba="0.2 0.2 0.2 1" />
+  </material>
+
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <box size="0.06 0.04 0.02" />
+      </geometry>
+      <material name="orange" />
+    </visual>
+  </link>
+
+  <link name="base_scan">
+    <pose>0 0 0 0 0 0</pose>
+    <visual>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <cylinder length="0.05" radius="0.03" />
+      </geometry>
+      <material name="gray" />
+    </visual>
+  </link>
+
+  <link name="base_link" />
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+          <box>
+            <size>0.3 0.3 0.1</size>
+          </box>
+        </geometry>
+      <material name="gray" />
+    </visual>
+  
+  <link name="base_footprint" />
+    <visual>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
+      <geometry>
+          <box>
+            <size>0.3 0.3 0.1</size>
+          </box>
+        </geometry>
+      <material name="gray" />
+    </visual>
+
+  <joint name="base_link_joint" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 0" />
+  </joint>
+
+  <joint name="imu_link_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="0 0 0" />
+  </joint>
+
+  <joint name="base_scan_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="base_scan" />
+    <origin xyz="-0.1 0 0.1" rpy="0.0 0.0 3.1416" />
+  </joint>
+
+  <joint name="fixed" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="link1"/>
+  </joint>
+
+  <link name="link1">
+    <collision>
+      <origin xyz="0.05 0 0.11" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.25 0.012"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.05 0 0.11" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.025 0.012"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <inertial>
+      <origin xyz="0.05 0 0.11" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <joint name="joint1" type="revolute">
+    <parent link="link1"/>
+    <child link="link2"/>
+    <origin xyz="0.05 0 0.11" rpy="0 0 3.14"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="30" lower="-1.5" upper="1.5" velocity="1.571"/>
+  </joint>
+
+  <link name="link2">
+    <collision>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.025 0.03"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.025 0.03"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <joint name="joint2" type="revolute">
+    <parent link="link2"/>
+    <child link="link3"/>
+    <origin xyz="-0.02 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="30" lower="-0.45" upper="1.5" velocity="1.571"/>
+  </joint>
+
+  <link name="link3">
+    <collision>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.04 0.04"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.04 0.04"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+</robot>
