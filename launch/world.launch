@@ -7,7 +7,6 @@
   <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster1" args="2.4 3.5 1.78 0 0 0 1 map base 100" />
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
 
-
   <param name="robot_description" textfile="$(find owayeol)/urdf/cctv.urdf" />
 
   <param name="robot_description1" textfile="$(find owayeol)/urdf/robot.urdf" />
