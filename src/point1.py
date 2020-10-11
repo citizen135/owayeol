@@ -90,6 +90,7 @@ def point(data):
     goal.pose.position.x=-1*data.range*math.cos(servox)*math.sin(servoy+1.57)
     goal.pose.position.y=-1*data.range*math.sin(servox)*math.sin(servoy+1.57)
     goal.pose.position.z=0
+    goal.pose.orientation.w=0.976695505967
 
 def talker():
     global servox
