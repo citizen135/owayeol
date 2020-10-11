@@ -79,6 +79,7 @@ def point(data):
     goal.pose.position.x=data.range*math.cos(servox)*math.sin(servoy+1.57)
     goal.pose.position.y=data.range*math.sin(servox)*math.sin(servoy+1.57)
     goal.pose.position.z=0
+    goal.pose.orientation.w=0.976695505967
     goal_publisher.publish(goal)
 
 def talker():
