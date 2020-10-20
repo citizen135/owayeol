@@ -34,7 +34,8 @@ from rqt_py_common.extended_combo_box import ExtendedComboBox
 #global distance
 waypoint_count=15
 search_flag = False
-stat = 0
+stat2 = 0
+stat3 = 0
 number=1
 count=0
 #catch
@@ -46,12 +47,19 @@ patrol_targetFind_flag = False
 tic_flag = False
 point = PoseStamped() 
 point_count = 0 
-home = expanduser("~")  
+home = expanduser("~") 
+way_last=len(os.walk("%s/owayeol/map23/path1" % (home)).next()[2])
+baglist=[0,]
+robot2_waynum=0
+robot3_waynum=0
+total_list1=[3,2,1,7,11,10,9,8]
+total_list2=[4,5,6,15,14,13,12]
 class MyApp(QWidget):
     #global catch
     global search_flag
     global count
     global patrol_targetFind_flag
+
     def __init__(self):
         QWidget.__init__(self)
         self.title = 'Warning Warning'
@@ -65,6 +73,12 @@ class MyApp(QWidget):
         global count
         global search_flag
         global tic_flag
+        global robot2_waynum
+        global robot3_waynum
+        global stat2
+        global stat3
+        global total_list1
+        global total_list2
         search_flag =False
         global patrol_targetFind_flag
         patrol_targetFind_flag = False
@@ -97,9 +111,7 @@ class MyApp(QWidget):
             print("start patrol2")
             go_list = search(start,cctv)
             backup_list=copy.deepcopy(go_list)
-            backup_list.reverse
-            total_list1=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-            total_list2=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+            backup_list.reverse()
             print(backup_list)
             print("start patrol3") 
             search_nearest_position(go_list)
@@ -107,7 +119,23 @@ class MyApp(QWidget):
                 print(patrol_targetFind_flag)
                 print(backup_list)
                 search_nearest_position(backup_list)
-                # if patrol_targetFind_flag == False:
+                if patrol_targetFind_flag == False:
+                    if stat2==3:
+                        patrol(2,total_list1[robot2_waynum])
+                        stat2=0
+                        robot2_waynum+=1
+                        if len(total_list1)==robot2_waynum:
+                            total_list1.reverse()
+                            robot2_waynum=1
+
+                    if stat3==3:
+                        patrol(3,total_list2[robot3_waynum])
+                        stat3=0
+                        robot3_waynum+=1
+                        if len(total_list2)==robot3_waynum:
+                            total_list2.reverse()
+                            robot3_waynum=1
+
                 #     search_nearest_position(total_list)
                 #     print("total patrol")
             print("start patrol4") 
@@ -539,9 +567,9 @@ def search(start,cctv):
 def search_nearest_position(waypoints):
         global waypoint_count
         global distance
-        global stat
+        global stat2
         global home
-        stat = 0
+        stat2 = 0
         go_point = 0
         rospy.Publisher("/robot2/move_base_simple/goal",PoseStamped,queue_size=1)
         list_length = len(waypoints)
@@ -582,9 +610,9 @@ def search_nearest_position(waypoints):
                 time.sleep(0.2)        
                 print("waypoint%d"%go_point)
                 print(distance)
-            while stat != 3 :
+            while stat2 != 3 :
                 continue
-            stat=0    
+            stat2=0    
             waypoints.remove(go_point)
             print(waypoints)
         print("finish patrol!!!")    
@@ -592,9 +620,9 @@ def search_nearest_position(waypoints):
 def total_position(waypoints):
         global waypoint_count
         global distance
-        global stat
+        global stat2
         global home
-        stat = 0
+        stat2 = 0
         rospy.Publisher("/robot2/move_base_simple/goal",PoseStamped,queue_size=1)
         list_length = len(waypoints)
         print(list_length)
@@ -611,16 +639,16 @@ def total_position(waypoints):
                 time.sleep(0.2)        
                 print("waypoint%d"%go_point)
                 print(distance)
-            while stat != 3 :
+            while stat2 != 3 :
                 continue
-            stat=0    
+            stat2=0    
             waypoints.remove(go_point)
             print(waypoints)
 
         print("finish patrol!!!")    
                     
 def robot_first_nav():
-    global stat
+    global stat2
     global goal_publisher
     global point
     print("1 start")
@@ -640,9 +668,9 @@ def robot_first_nav():
     #        goal1.pose=msg.pose.pose
     #        goal_publisher1.publish(goal1)
     print("1 end")
-    while stat != 3 :
+    while stat2 != 3 :
         continue
-    stat=0    
+    stat2=0    
 
 def ALERT():
     global wait_num
@@ -769,10 +797,10 @@ def search_start_position():
         global flag10
         global waypoint_count
         global distance
-        global stat
+        global stat2
         global home
         global start_position
-        stat = 0
+        stat2 = 0
         start_position = 1
         start_list = []
         min = 99999
@@ -814,16 +842,21 @@ def search_start_position():
             goal.pose=msg.pose.pose
             goal_publisher.publish(goal)
 
-        while stat != 3 :
+        while stat2 != 3 :
             continue  
-        stat = 0       
+        stat2 = 0       
         print(start_position) 
         return start_position        
 
-def arriverobot(data):										
-	global stat
-	stat=data.status.status
-	rospy.loginfo(rospy.get_caller_id() + str(stat))  
+def arriverobot2(data):										
+	global stat2
+	stat2=data.status.status
+	rospy.loginfo(rospy.get_caller_id() + str(stat2))  
+
+def arriverobot3(data):										
+	global stat3
+	stat3=data.status.status
+	rospy.loginfo(rospy.get_caller_id() + str(stat3))  
 
 
         #flag10 = True
@@ -992,12 +1025,35 @@ def Warningg(data):
         count=0
     
 """
+def waypoint_store():
+    global baglist
+    global way_last
+
+    for i in range(1,way_last+1):
+        bag=rosbag.Bag("%s/owayeol/map23/path1/waypoint%d.bag" %(home,i))
+        for topic, msg, t in bag.read_messages(topics=[]):
+            baglist.append(msg.pose.pose)
+        print(str(i))
+        print(baglist[i])
+
+def patrol(robotnum,waypointnum):
+    global baglist
+
+    goal_publisher = rospy.Publisher('/robot%s/move_base_simple/goal'%(robotnum), PoseStamped, queue_size=1)
+    goal = PoseStamped()
+    goal.header.stamp = rospy.Time.now()
+    goal.header.frame_id = "map"
+    goal.pose=baglist[waypointnum]
+    time.sleep(0.1)
+    goal_publisher.publish(goal)
+
 if __name__ == '__main__':
     global rb_num
     global flag11
     rospy.init_node('PatrolServer',anonymous=True)
     print("start!!!!!!")
     rospy.Subscriber("/test",Meter,meter,queue_size=1)
+    waypoint_store()
     #patrol()
     # start = 5 
     # cctv=[5,7,8,9]  
@@ -1006,7 +1062,8 @@ if __name__ == '__main__':
     rospy.Subscriber("/find",PoseStamped,Receive_Point)
     rospy.Timer(rospy.Duration(0.1),tic) 
     rospy.Timer(rospy.Duration(0.1),tic2)       
-    rospy.Subscriber('/robot2/move_base/result', MoveBaseActionResult, arriverobot)
+    rospy.Subscriber('/robot2/move_base/result', MoveBaseActionResult, arriverobot2)
+    rospy.Subscriber('/robot3/move_base/result', MoveBaseActionResult, arriverobot3)
     rospy.Publisher("robot3/move_base_simple/goal",PoseStamped,queue_size=1)     
     goal_publisher = rospy.Publisher('robot2/move_base_simple/goal', PoseStamped, queue_size=1)      
     goal_publisher1 = rospy.Publisher('robot3/move_base_simple/goal', PoseStamped, queue_size=1)      
