@@ -34,8 +34,8 @@ from rqt_py_common.extended_combo_box import ExtendedComboBox
 #global distance
 waypoint_count=15
 search_flag = False
-stat2 = 0
-stat3 = 0
+stat2 = 3
+stat3 = 3
 number=1
 count=0
 #catch
@@ -82,6 +82,8 @@ class MyApp(QWidget):
         search_flag =False
         global patrol_targetFind_flag
         patrol_targetFind_flag = False
+        stat2=3
+        stat3=3
         count=0
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
@@ -119,22 +121,7 @@ class MyApp(QWidget):
                 print(patrol_targetFind_flag)
                 print(backup_list)
                 search_nearest_position(backup_list)
-                if patrol_targetFind_flag == False:
-                    if stat2==3:
-                        patrol(2,total_list1[robot2_waynum])
-                        stat2=0
-                        robot2_waynum+=1
-                        if len(total_list1)==robot2_waynum:
-                            total_list1.reverse()
-                            robot2_waynum=1
-
-                    if stat3==3:
-                        patrol(3,total_list2[robot3_waynum])
-                        stat3=0
-                        robot3_waynum+=1
-                        if len(total_list2)==robot3_waynum:
-                            total_list2.reverse()
-                            robot3_waynum=1
+                
 
                 #     search_nearest_position(total_list)
                 #     print("total patrol")
@@ -925,6 +912,14 @@ def tic(event):
     global point_count
     global find_flag
     global tic_flag
+    global robot2_waynum
+    global robot3_waynum
+    global stat2
+    global stat3
+    global total_list1
+    global total_list2
+    global patrol_targetFind_flag
+
     point_count+=1
     #print("test1")
     if find_flag == True and point_count == 50:
@@ -934,6 +929,24 @@ def tic(event):
         tic_flag = False
     if point_count == 100:
         point_count = 0
+    if patrol_targetFind_flag == False:
+        print("stat2: "+str(stat2))
+        print("stat3: "+str(stat3))
+        if stat2==3:
+            patrol(2,total_list1[robot2_waynum])
+            stat2=0
+            robot2_waynum+=1
+            if len(total_list1)==robot2_waynum:
+                total_list1.reverse()
+                robot2_waynum=1
+
+        if stat3==3:
+            patrol(3,total_list2[robot3_waynum])
+            stat3=0
+            robot3_waynum+=1
+            if len(total_list2)==robot3_waynum:
+                total_list2.reverse()
+                robot3_waynum=1
 
 def tic2(event):
     global tic_flag
@@ -1083,6 +1096,7 @@ if __name__ == '__main__':
     #ex.catch=999
     #ALERT(ex)
     ##
+    print(1)
     rospy.spin()
     # while not rospy.is_shutdown():
     #     try:
