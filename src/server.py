@@ -31,17 +31,19 @@ from relaxed_astar.msg import Meter
 from darknet_ros_msgs.msg import BoundingBoxes
 from rqt_py_common.extended_combo_box import ExtendedComboBox
 
+total_flag=0
 #global distance
-waypoint_count=15
+waypoint_count=12
 search_flag = False
-stat2 = 3
-stat3 = 3
 number=1
+point_count1=0
 count=0
 #catch
 count1=0
 count2=0
 count3=0
+stat2=0
+stat3=0
 find_flag = False
 patrol_targetFind_flag = False
 tic_flag = False
@@ -52,8 +54,10 @@ way_last=len(os.walk("%s/owayeol/map23/path1" % (home)).next()[2])
 baglist=[0,]
 robot2_waynum=0
 robot3_waynum=0
-total_list1=[3,2,1,7,11,10,9,8]
-total_list2=[4,5,6,15,14,13,12]
+total_list1=[3,2,1,7,8,9]
+total_list2=[5,6,12,11,10]
+stop_flag3=1
+
 class MyApp(QWidget):
     #global catch
     global search_flag
@@ -81,9 +85,9 @@ class MyApp(QWidget):
         global total_list2
         search_flag =False
         global patrol_targetFind_flag
+        global total_flag
+        global stat2    
         patrol_targetFind_flag = False
-        stat2=3
-        stat3=3
         count=0
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
@@ -93,7 +97,7 @@ class MyApp(QWidget):
             self, 'Object Detection', "person Detection \n do you want to record continue?", 
             QMessageBox.Yes | QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Reset | QMessageBox.No, QMessageBox.No)
         print("@@@@@@@@@@@@@@@@")
-        cctv = [7,8,12,13]  
+        cctv = [7,8,10]  
         if buttonReply == QMessageBox.Yes: # no action
             testmessage()
             print('Yes clicked.')
@@ -109,7 +113,7 @@ class MyApp(QWidget):
             #search_flag = True
             robot_first_nav() 
             print("start patrol1")
-            start = search_start_position() 
+            start = search_start_position(cctv) 
             print("start patrol2")
             go_list = search(start,cctv)
             backup_list=copy.deepcopy(go_list)
@@ -121,8 +125,10 @@ class MyApp(QWidget):
                 print(patrol_targetFind_flag)
                 print(backup_list)
                 search_nearest_position(backup_list)
-                
-
+                if patrol_targetFind_flag == False:
+                    total_flag=1
+                    stat2=3    
+                    stat3=3
                 #     search_nearest_position(total_list)
                 #     print("total patrol")
             print("start patrol4") 
@@ -166,12 +172,7 @@ class Server(QWidget):
         self.call_robot1_teleop.clicked.connect(self.call_button_robot1_teleop)
         #self.call_robot2_teleop.clicked.connect(self.call_button_robot2_teleop)
         #self.call_robot3_teleop.clicked.connect(self.call_button_robot3_teleop)
-        self.target_stop.clicked.connect(self.target_button_stop)
-        self.patrol.clicked.connect(self.patrol_button)
-        self.patrol_stop.clicked.connect(self.patrol_stop_button)
-        self.init_place.clicked.connect(self.init_place_button)
-        #self.lineEdit = QLabel(self)
-        self.Robot_Number.setText("robot1")
+        #self.target_stop.clicked.connect(self.target_buttu
         self.Main_Command.setText("nothing")
         self.Robot_state.setText("nothing")
         self.Battery_State.setText("70%")
@@ -394,40 +395,35 @@ global visited
 global arr
 global patrol_point_list
 global finish_point
-arr = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0]
-      ,[0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0]
-      ,[0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1]
-      ,[0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0]
-      ,[0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0]
-      ,[0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0]
-      ,[0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0]
-      ,[0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0]
-      ,[0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1]
-      ,[0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0]
-      ,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1]
-      ,[0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0]]
-arr1 = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0]
-      ,[0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0]
-      ,[0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0]
-      ,[0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1]
-      ,[0,1,0,0,0,0,0,0,1,0,0,1,1,0,0,1]#7
-      ,[0,0,0,0,0,0,0,1,0,1,1,0,1,0,0,1]
-      ,[0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0]
-      ,[0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0]
-      ,[0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0]
-      ,[0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,1]
-      ,[0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0]
-      ,[0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1]
-      ,[0,0,0,0,0,0,1,1,1,0,0,0,1,0,1,0]]      
-visited = [False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False]
-visited1 = [False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False] 
+arr = [[0,0,0,0,0,0,0,0,0,0,0,0,0]
+      ,[0,0,1,0,0,0,0,1,0,0,0,0,0]
+      ,[0,1,0,1,0,0,0,0,0,0,0,0,0]
+      ,[0,0,1,0,1,0,0,0,0,0,0,0,0]
+      ,[0,0,0,1,0,1,0,0,0,0,0,0,0]
+      ,[0,0,0,0,1,0,1,0,0,0,0,0,0]
+      ,[0,0,0,0,0,1,0,0,0,0,0,0,1]
+      ,[0,1,0,0,0,0,0,0,1,0,0,0,0]
+      ,[0,0,0,0,0,0,0,1,0,1,1,0,0]#8
+      ,[0,0,0,0,0,0,0,0,1,0,0,0,0]
+      ,[0,0,0,0,0,0,0,0,1,0,0,1,0]
+      ,[0,0,0,0,0,0,0,0,0,0,1,0,1]#11
+      ,[0,0,0,0,0,0,1,0,0,0,0,1,0]]
+
+arr1 =[[0,0,0,0,0,0,0,0,0,0,0,0,0]
+      ,[0,0,1,0,0,0,0,1,0,0,0,0,0]
+      ,[0,1,0,1,0,0,0,0,0,0,0,0,0]
+      ,[0,0,1,0,1,0,0,0,0,0,0,0,0]
+      ,[0,0,0,1,0,1,0,0,0,0,0,0,0]
+      ,[0,0,0,0,1,0,1,0,0,0,0,0,0]
+      ,[0,0,0,0,0,1,0,0,0,0,0,1,1]
+      ,[0,1,0,0,0,0,0,0,1,0,1,0,0]#7
+      ,[0,0,0,0,0,0,0,1,0,1,1,0,0]
+      ,[0,0,0,0,0,0,0,0,1,0,0,0,0]
+      ,[0,0,0,0,0,0,0,1,1,0,0,1,0]
+      ,[0,0,0,0,0,0,0,0,0,0,1,0,1]
+      ,[0,0,0,0,0,0,1,0,0,0,0,1,0]]   
+visited = [False,False,False,False,False,False,False,False,False,False,False,False,False,False]
+visited1 = [False,False,False,False,False,False,False,False,False,False,False,False,False,False] 
 
 def dfs(index):    
     global visited 
@@ -457,6 +453,8 @@ def search(start,cctv):
     global finish_point
     global home 
     global start_position
+    global stop_flag3
+
     flag = False
     if  start in cctv:
         cctv.remove(start)
@@ -508,46 +506,44 @@ def search(start,cctv):
         goal.header.frame_id = "map"
         goal.pose=msg.pose.pose
         goal_publisher.publish(goal)
+        stop_flag3=1
+    if start_position in patrol_point_list:
+        patrol_point_list.remove(start_position)    
     # if flag == True:
     #     patrol_point_list.remove(start)
     # if finish_point in patrol_point_list:
     #     patrol_point_list.remove(finish_point)    
 
     # print("patrol points:"+str(patrol_point_list)) 
-    arr = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0]
-          ,[0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0]
-          ,[0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1]
-          ,[0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0]
-          ,[0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0]
-          ,[0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0]
-          ,[0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0]
-          ,[0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0]
-          ,[0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1]
-          ,[0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0]
-          ,[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1]
-          ,[0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0]]
-    arr1 = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0]
-          ,[0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0]
-          ,[0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0]
-          ,[0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1]
-          ,[0,1,0,0,0,0,0,0,1,0,0,1,1,0,0,1]#7
-          ,[0,0,0,0,0,0,0,1,0,1,1,0,1,0,0,1]
-          ,[0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0]
-          ,[0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0]
-          ,[0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0]
-          ,[0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,1]
-          ,[0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0]
-          ,[0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1]
-          ,[0,0,0,0,0,0,1,1,1,0,0,0,1,0,1,0]]      
-    visited = [False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False]
-    visited1 = [False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False]  
+    arr = [[0,0,0,0,0,0,0,0,0,0,0,0,0]
+          ,[0,0,1,0,0,0,0,1,0,0,0,0,0]
+          ,[0,1,0,1,0,0,0,0,0,0,0,0,0]
+          ,[0,0,1,0,1,0,0,0,0,0,0,0,0]
+          ,[0,0,0,1,0,1,0,0,0,0,0,0,0]
+          ,[0,0,0,0,1,0,1,0,0,0,0,0,0]
+          ,[0,0,0,0,0,1,0,0,0,0,0,0,1]
+          ,[0,1,0,0,0,0,0,0,1,0,0,0,0]
+          ,[0,0,0,0,0,0,0,1,0,1,1,0,0]#8
+          ,[0,0,0,0,0,0,0,0,1,0,0,0,0]
+          ,[0,0,0,0,0,0,0,0,1,0,0,1,0]
+          ,[0,0,0,0,0,0,0,0,0,0,1,0,1]#11
+          ,[0,0,0,0,0,0,1,0,0,0,0,1,0]]
+
+    arr1 =[[0,0,0,0,0,0,0,0,0,0,0,0,0]
+          ,[0,0,1,0,0,0,0,1,0,0,0,0,0]
+          ,[0,1,0,1,0,0,0,0,0,0,0,0,0]
+          ,[0,0,1,0,1,0,0,0,0,0,0,0,0]
+          ,[0,0,0,1,0,1,0,0,0,0,0,0,0]
+          ,[0,0,0,0,1,0,1,0,0,0,0,0,0]
+          ,[0,0,0,0,0,1,0,0,0,0,0,1,1]
+          ,[0,1,0,0,0,0,0,0,1,0,1,0,0]#7
+          ,[0,0,0,0,0,0,0,1,0,1,1,0,0]
+          ,[0,0,0,0,0,0,0,0,1,0,0,0,0]
+          ,[0,0,0,0,0,0,0,1,1,0,0,1,0]
+          ,[0,0,0,0,0,0,0,0,0,0,1,0,1]
+          ,[0,0,0,0,0,0,1,0,0,0,0,1,0]]   
+    visited = [False,False,False,False,False,False,False,False,False,False,False,False,False,False]
+    visited1 = [False,False,False,False,False,False,False,False,False,False,False,False,False,False] 
     return patrol_point_list
 
 
@@ -562,8 +558,10 @@ def search_nearest_position(waypoints):
         list_length = len(waypoints)
         print(list_length)
         time.sleep(2)
-
-        for j in range(1,list_length+1):
+        print(waypoints)
+        #waypoints_copy=copy.deepcopy(waypoint)
+        #for j in waypoints_copy:
+        for j in waypoints:
             # min = 99999
             # for i in waypoints:
             #     bag = rosbag.Bag("%s/owayeol/map23/path1/waypoint%d.bag" %(home,i))
@@ -594,45 +592,59 @@ def search_nearest_position(waypoints):
                 goal.header.frame_id = "map"
                 goal.pose=msg.pose.pose
                 goal_publisher.publish(goal)
-                time.sleep(0.2)        
+                time.sleep(0.5)        
                 print("waypoint%d"%go_point)
                 print(distance)
             while stat2 != 3 :
                 continue
+            rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+            twist = Twist()
+            twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+            twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+            stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+            pub11 = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
+            pub11.publish(twist)
             stat2=0    
-            waypoints.remove(go_point)
+            print(go_point)
             print(waypoints)
         print("finish patrol!!!")    
 
-def total_position(waypoints):
-        global waypoint_count
-        global distance
-        global stat2
-        global home
-        stat2 = 0
-        rospy.Publisher("/robot2/move_base_simple/goal",PoseStamped,queue_size=1)
-        list_length = len(waypoints)
-        print(list_length)
-        for j in waypoints:
-            go_point = j
-            bag = rosbag.Bag("%s/owayeol/map23/path1/waypoint%d.bag" %(home,go_point))        
-            goal_publisher = rospy.Publisher('/robot2/move_base_simple/goal', PoseStamped, queue_size=1)
-            goal = PoseStamped()
-            for topic, msg, t in bag.read_messages(topics=[]):
-                goal.header.stamp = rospy.Time.now()
-                goal.header.frame_id = "map"
-                goal.pose=msg.pose.pose
-                goal_publisher.publish(goal)
-                time.sleep(0.2)        
-                print("waypoint%d"%go_point)
-                print(distance)
-            while stat2 != 3 :
-                continue
-            stat2=0    
-            waypoints.remove(go_point)
-            print(waypoints)
+# def total_position(waypoints):
+#         global waypoint_count
+#         global distance
+#         global stat2
+#         global home
+#         stat2 = 0
+#         rospy.Publisher("/robot2/move_base_simple/goal",PoseStamped,queue_size=1)
+#         list_length = len(waypoints)
+#         print(list_length)
+#         for j in waypoints:
+#             go_point = j
+#             bag = rosbag.Bag("%s/owayeol/map23/path1/waypoint%d.bag" %(home,go_point))        
+#             goal_publisher = rospy.Publisher('/robot2/move_base_simple/goal', PoseStamped, queue_size=1)
+#             goal = PoseStamped()
+#             for topic, msg, t in bag.read_messages(topics=[]):
+#                 goal.header.stamp = rospy.Time.now()
+#                 goal.header.frame_id = "map"
+#                 goal.pose=msg.pose.pose
+#                 goal_publisher.publish(goal)
+#                 time.sleep(0.2)        
+#                 print("waypoint%d"%go_point)
+#                 print(distance)
+#             while stat2 != 3 :
+#                 continue
+#             rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+#             twist = Twist()
+#             twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+#             twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+#             stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+#             pub11 = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+#             pub11.publish(twist)
+#             stat2=0    
+#             waypoints.remove(go_point)
+#             print(waypoints)
 
-        print("finish patrol!!!")    
+#         print("finish patrol!!!")    
                     
 def robot_first_nav():
     global stat2
@@ -657,7 +669,14 @@ def robot_first_nav():
     print("1 end")
     while stat2 != 3 :
         continue
-    stat2=0    
+    stat2=0
+    rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+    twist = Twist()
+    twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+    twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+    stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+    pub11 = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
+    pub11.publish(twist)
 
 def ALERT():
     global wait_num
@@ -780,7 +799,7 @@ def robotstate(data):
     wait_num[robo]=data.run
     path_num[robo]=data.path_num
 
-def search_start_position():  
+def search_start_position(cctv):  
         global flag10
         global waypoint_count
         global distance
@@ -793,7 +812,8 @@ def search_start_position():
         min = 99999
         rospy.Publisher("/robot2/move_base_simple/goal",PoseStamped,queue_size=1)
         for i in range(1,waypoint_count+1):
-            print("test")
+            if i in cctv:
+                continue
             bag = rosbag.Bag("%s/owayeol/map23/path1/waypoint%d.bag" %(home,i))
             goal_publisher = rospy.Publisher('/robot2/move_base_simple/goal', PoseStamped, queue_size=1)
             goal = PoseStamped()
@@ -815,9 +835,9 @@ def search_start_position():
                 print(start_list[0])
         #print("test1")
         start_list.sort()    
-        print(start_list[1][1])
-        #start_position = start_list[1][1]
-        start_position = 1   
+        print(start_list[0][1])
+        start_position = start_list[0][1]
+        #start_position = 1   
         print("start_position: %d"%start_position)    
 
         bag = rosbag.Bag("%s/owayeol/map23/path1/waypoint%d.bag" %(home,start_position))
@@ -831,6 +851,13 @@ def search_start_position():
 
         while stat2 != 3 :
             continue  
+        rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+        twist = Twist()
+        twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+        twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+        stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+        pub11 = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
+        pub11.publish(twist)
         stat2 = 0       
         print(start_position) 
         return start_position        
@@ -919,9 +946,20 @@ def tic(event):
     global total_list1
     global total_list2
     global patrol_targetFind_flag
+    global stop_flag3
+    global total_flag
 
     point_count+=1
     #print("test1")
+    # if stop_flag3:
+    #     if stat3==3:
+    #         twist = Twist()
+    #         twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+    #         twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+    #         pub12 = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=10)
+    #         pub12.publish(twist)
+    #         stat3=0
+    #         stop_flag3=0
     if find_flag == True and point_count == 50:
         find_flag = False
         point_count = 0
@@ -929,9 +967,9 @@ def tic(event):
         tic_flag = False
     if point_count == 100:
         point_count = 0
-    if patrol_targetFind_flag == False:
-        print("stat2: "+str(stat2))
-        print("stat3: "+str(stat3))
+    if total_flag:
+        # print("stat2: "+str(stat2))
+        # print("stat3: "+str(stat3))
         if stat2==3:
             patrol(2,total_list1[robot2_waynum])
             stat2=0
@@ -948,25 +986,26 @@ def tic(event):
                 total_list2.reverse()
                 robot3_waynum=1
 
+
 def tic2(event):
     global tic_flag
     global find_flag
-    global point_count
+    global point_count1
     if tic_flag == True and find_flag == True:
-        point_count+=1
-        print(point_count)
+        point_count1+=1
+        print(point_count1)
         print(tic_flag)
-        if point_count == 10:
+        if point_count1 == 10:
             rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
-            stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
-            pub11 = rospy.Publisher('cmd_vel', Twist, queue_size=10)
             twist = Twist()
             twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
             twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+            stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+            pub11 = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
             pub11.publish(twist)
             stop_publisher.publish()
             send_message()
-            point_count = 0
+            point_count1 = 0
         
 def send_message():
     global patrol_targetFind_flag

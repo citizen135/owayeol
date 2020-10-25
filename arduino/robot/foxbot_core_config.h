@@ -58,9 +58,9 @@
 #define RATE_CONTROLLER_MAX_PWM 			500
 
 /* Mechanical parameters */
-#define WHEEL_RADIUS 						0.05 		// [m]
+#define WHEEL_RADIUS 						0.11 		// [m]
 // distance between the two wheels
-#define BASE_LENGTH 						0.37 		// [m]  0.288
+#define BASE_LENGTH 						0.25 		// [m]  0.288
 
 /* Define frequency loops */
 Timer _frequency_rate(FREQUENCY_RATE);
