@@ -36,6 +36,7 @@ total_flag=0
 #global distance
 waypoint_count=9
 search_flag = False
+last_flag = False
 number=1
 point_count1=0
 count=0
@@ -55,8 +56,8 @@ way_last=len(os.walk("%s/owayeol/map23/path1" % (home)).next()[2])
 baglist=[0,]
 robot2_waynum=0
 robot3_waynum=0
-total_list1=[1,2,3,4,7]
-total_list2=[5,6,8,9]
+total_list1=[5,8,9,6]
+total_list2=[3,2,1,4,7]
 stop_flag3=1
 xangle=0
 class MyApp(QWidget):
@@ -100,9 +101,11 @@ class MyApp(QWidget):
             QMessageBox.Yes | QMessageBox.Save | QMessageBox.Cancel | QMessageBox.Reset | QMessageBox.No, QMessageBox.No)
         print("@@@@@@@@@@@@@@@@")
         if xangle>0:
-            cctv = [1,4,7]
+            cctv = [1,2,3]
+            total_list2.reverse()
+            total_list1.reverse()
         else:
-            cctv = [1,2,3]  
+            cctv = [1,4,7]  
         if buttonReply == QMessageBox.Yes: # no action
             testmessage()
             print('Yes clicked.')
@@ -181,6 +184,7 @@ class Server(QWidget):
         self.Main_Command.setText("nothing")
         self.Robot_state.setText("nothing")
         self.Battery_State.setText("70%")
+        self.init_place.clicked.connect(self.init_place_button)
         
 
 
@@ -378,15 +382,16 @@ class Server(QWidget):
       comm_pub.publish(comm)
     @Slot()
     def init_place_button(self):
-      global number
-      print("init_place")
-      self.Robot_state.setText("init_place")
-      topicname="/robot%d/maincommand" % number
-      print(topicname)
-      comm_pub=rospy.Publisher(topicname, String, queue_size=1)
-      comm="w"
-      comm_pub.publish(comm)
-      comm_pub.publish(comm)
+        twist = Twist()
+        twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+        twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+        stop_publisher2 = rospy.Publisher('/robot3/move_base/cancel',GoalID, queue_size=1)
+        pub12 = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=1)
+        pub12.publish(twist)
+        stop_publisher2.publish()
+        stop_publisher2.publish()
+        pub12.publish(twist)
+      
 
 ##clea
 wait_num=[0]*3
@@ -508,6 +513,8 @@ def search(start,cctv):
         stop_flag3=1
     if start_position in patrol_point_list:
         patrol_point_list.remove(start_position)    
+    if start_position==6:
+        patrol_point_list= [6,9,8,5]    
     # if flag == True:
     #     patrol_point_list.remove(start)
     # if finish_point in patrol_point_list:
@@ -816,12 +823,12 @@ def search_start_position(cctv):
                 goal.header.frame_id = "map"
                 goal.pose=msg.pose.pose
                 goal_publisher.publish(goal)
-                time.sleep(0.1)
+                time.sleep(0.3)
                 rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
                 stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
                 stop_publisher.publish()
                 stop_publisher.publish()
-                time.sleep(0.1)    
+                time.sleep(0.3)    
                 print("waypoint%d"%i)
                 print(distance)
                 print(i)
@@ -928,10 +935,26 @@ def Receive_Point(data):
     point_count = 0
     data.pose.position.z = 0
     point = data
+    twist = Twist()
+    twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+    twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+    stop_publisher1 = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+    pub11 = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=1)
+    stop_publisher2 = rospy.Publisher('/robot3/move_base/cancel',GoalID, queue_size=1)
+    pub12 = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=1)
+    pub11.publish(twist)
+    stop_publisher1.publish()
+    pub12.publish(twist)
+    stop_publisher2.publish()
+    stop_publisher1.publish()
+    pub11.publish(twist)
+    stop_publisher2.publish()
+    pub12.publish(twist)
 
 def angle(data):
     global xangle
     xangle = data.position[0]
+    #print(xangle)
 
 def tic(event):
     global point_count
@@ -954,7 +977,13 @@ def tic(event):
     #         twist = Twist()
     #         twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
     #         twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
-    #         pub12 = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=10)
+    #         pub12 = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=1)
+    #         pub12.publish(twist)
+    #         time.sleep(0.3)
+    #         pub12.publish(twist)
+    #         time.sleep(0.3)
+    #         pub12.publish(twist)
+    #         time.sleep(0.3)
     #         pub12.publish(twist)
     #         stat3=0
     #         stop_flag3=0
@@ -983,30 +1012,62 @@ def tic(event):
             if len(total_list2)==robot3_waynum:
                 total_list2.reverse()
                 robot3_waynum=1
+    else:
+        if stat3==3:
+            rospy.Publisher('/robot3/move_base/cancel',GoalID, queue_size=1)
+            twist = Twist()
+            twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
+            twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
+            stop_publisher = rospy.Publisher('/robot3/move_base/cancel',GoalID, queue_size=1)
+            pub11 = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=10)
+            pub11.publish(twist)
+            stop_publisher.publish()
+            time.sleep(0.3)
+            stop_publisher.publish()
+            pub11.publish(twist)
+            time.sleep(0.3)
+            stop_publisher.publish()
+            pub11.publish(twist)
+
+
 
 
 def tic2(event):
     global tic_flag
     global find_flag
+    global last_flag
     global point_count1
-    if tic_flag == True and find_flag == True:
+    if tic_flag == True and find_flag == True and last_flag == False:
         point_count1+=1
         print(point_count1)
-        print(tic_flag)
         if point_count1 == 10:
-            rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+            find_flag = False
+            last_flag = True
             twist = Twist()
             twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
             twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
-            stop_publisher = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
-            pub11 = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=10)
+            stop_publisher1 = rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+            pub11 = rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=1)
+            stop_publisher2 = rospy.Publisher('/robot3/move_base/cancel',GoalID, queue_size=1)
+            pub12 = rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=1)
             pub11.publish(twist)
-            stop_publisher.publish()
-            stop_publisher.publish()
-            time.sleep(1)
-            stop_publisher.publish()
-            stop_publisher.publish()
-            stop_publisher.publish()
+            stop_publisher1.publish()
+            time.sleep(0.1)
+            pub12.publish(twist)
+            stop_publisher2.publish()
+            time.sleep(0.1)
+            stop_publisher1.publish()
+            pub11.publish(twist)
+            time.sleep(0.1)
+            stop_publisher2.publish()
+            pub12.publish(twist)
+            time.sleep(0.1)
+            stop_publisher1.publish()
+            pub11.publish(twist)
+            time.sleep(0.1)
+            stop_publisher2.publish()
+            pub12.publish(twist)
+            print("send_message")
             send_message()
             point_count1 = 0
         
@@ -1030,7 +1091,7 @@ def send_message():
     shared_URL = dbx.sharing_create_shared_link_with_settings(pathname).url
     modified_URL = shared_URL[:-1] + '0'
     print(modified_URL)
-    findpoints="371.234,234.345"
+    findpoints="target is clock"
     os.system("""curl -X POST -H "Content-Type: application/json" -d '{"value1":"%s","value2":"%s"}' https://maker.ifttt.com/trigger/test1/with/key/cwQ6zkVXNdj2XhaKkTkTBG"""%(findpoints,modified_URL))
     os.chdir("%s/catkin_ws/src/owayeol/src/"%home)
     print(filename+" "+filename2)
@@ -1119,11 +1180,15 @@ if __name__ == '__main__':
     rospy.Timer(rospy.Duration(0.1),tic2)       
     rospy.Subscriber('/robot2/move_base/result', MoveBaseActionResult, arriverobot2)
     rospy.Subscriber('/robot3/move_base/result', MoveBaseActionResult, arriverobot3)
-    rospy.Subscriber('/robot1/joint_states',JointState,angle)
+    rospy.Subscriber('/joint_states',JointState,angle)
     rospy.Publisher("robot3/move_base_simple/goal",PoseStamped,queue_size=1)     
     goal_publisher = rospy.Publisher('robot2/move_base_simple/goal', PoseStamped, queue_size=1)      
     goal_publisher1 = rospy.Publisher('robot3/move_base_simple/goal', PoseStamped, queue_size=1)      
-    rospy.Publisher('robot2/move_base/cancel',GoalID, queue_size=1)        
+    rospy.Publisher('robot2/move_base/cancel',GoalID, queue_size=1)     
+    rospy.Publisher('/robot2/move_base/cancel',GoalID, queue_size=1)
+    rospy.Publisher('/robot2/cmd_vel', Twist, queue_size=1)
+    rospy.Publisher('/robot3/move_base/cancel',GoalID, queue_size=1)
+    rospy.Publisher('/robot3/cmd_vel', Twist, queue_size=1)   
     #rospy.Subscriber("/darknet_ros/bounding_boxes",BoundingBoxes,ALERT)
     #os.chdir('/home/pjh/bag_dir/robot3')
     #os.system("rosbag record /cv_camera/image_raw/compressed &")  
